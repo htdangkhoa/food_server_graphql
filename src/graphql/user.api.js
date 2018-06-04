@@ -21,6 +21,7 @@ const typeDefs = `
     # This function requires email & password.
     login(request: UserRequest): Token
 
+    # Get info of user.
     me: User
   }
 

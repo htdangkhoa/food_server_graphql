@@ -24,20 +24,18 @@ const typeDefs = `
 
   type Query {
     getAllFoods(skip: Int): [Food]
+
+    # q requires a array os String.
+    searchFood(q: [String]!): [Food]
   }
 
   type Mutation {
+    # This function requires token to access.
     addFood(request: FoodRequest): Food
   }
 `
 
-const getAllFoods = async (_, args, context) => {
-  let { token } = context
-
-  let payload = await verify(token)
-  
-  if (!payload) throw 'invalid token.'
-
+const getAllFoods = async (_, args) => {
   let { skip } = args
 
   let foods = await Food.find()
@@ -47,7 +45,13 @@ const getAllFoods = async (_, args, context) => {
   return foods
 }
 
-const addFood = async (_, args) => {
+const addFood = async (_, args, context) => {
+  let { token } = context
+
+  let payload = await verify(token)
+  
+  if (!payload) throw 'invalid token.'
+
   let { request } = args
   if (request.rating)
     request.rating = parseFloat((request.rating).toFixed(1))
@@ -63,9 +67,18 @@ const addFood = async (_, args) => {
   }
 }
 
+const searchFood = async (_, args) => {
+  let { q } = args
+
+  let foods = await Food.find({ tags: { '$in': q } })
+
+  return foods
+}
+
 const resolvers = {
   Query: {
-    getAllFoods
+    getAllFoods,
+    searchFood
   },
   Mutation: {
     addFood

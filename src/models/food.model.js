@@ -22,10 +22,11 @@ const Food = new Schema({
   },
   rating: {
     type: Schema.Types.Number,
+    max: 5.0,
     default: 0
   },
   tags: {
-    type: Schema.Types.Mixed,
+    type: [{ type: Schema.Types.String, lowercase: true }],
     default: []
   }
 }, {
