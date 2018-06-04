@@ -32,15 +32,23 @@ const typeDefs = `
 `
 
 const login = async (_, args) => {
-  let { request } = args
+  let { email, password } = args.request
 
-  let user = await User.findOne(request)
+  let user = await User.findOne({ email })
 
-  if (user == null) return null
-
-  let token = await sign(user)
-
-  return { token }
+  if (!user) throw `Email or password is not correct.`
+  
+  return new Promise((resolve, reject) => {
+    user.comparePassword(password, function (error, isMatch) {
+      if (error) throw error
+  
+      if (!isMatch) return reject(`Email or password is not correct.`) 
+  
+      let token = sign(user)
+  
+      return resolve({ token })
+    })
+  })
 }
 
 const registerUser = async (_, args) => {
