@@ -13,7 +13,7 @@ dotenv.config()
 mongoose.connect(process.env.DB, (error, db) => {
   if (error) return console.error(error)
 
-  return console.debug(`Connect mongoDB successful`)
+  return console.info(`Connect mongoDB successful`)
 })
 
 const app = express()
@@ -31,8 +31,9 @@ app.use('/graphql', graphqlExpress((req, res) => {
     rootValue: { req, res }
   }
 }))
+
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 app.listen(process.env.PORT, () => {
-  console.debug(`Server is running on port ${process.env.PORT}`)
+  console.info(`Server is running on port ${process.env.PORT}`)
 })

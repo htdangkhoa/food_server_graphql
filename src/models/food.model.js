@@ -25,6 +25,10 @@ const Food = new Schema({
     max: 5.0,
     default: 0
   },
+  counting: {
+    type: [{ type: Schema.Types.Number, max: 5 }],
+    default: []
+  },
   tags: {
     type: [{ type: Schema.Types.String, lowercase: true }],
     default: []
