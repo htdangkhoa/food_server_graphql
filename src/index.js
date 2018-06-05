@@ -2,7 +2,6 @@ import './utils/logger'
 import dotenv from 'dotenv'
 import express from 'express'
 import bodyParser from 'body-parser'
-import apicache from 'apicache'
 
 // For balancing.
 import cluster from 'cluster'
@@ -13,9 +12,6 @@ import mongoose from 'mongoose'
 
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import schema from './graphql'
-
-// For caching server.
-const cache = apicache.middleware
 
 dotenv.config()
 
@@ -29,8 +25,7 @@ const app = express()
 
 app.use([
   bodyParser.json(), 
-  bodyParser.urlencoded({ extended: false }),
-  cache('60 minutes')
+  bodyParser.urlencoded({ extended: false })
 ])
 
 app.use('/graphql', graphqlExpress((req, res) => {
