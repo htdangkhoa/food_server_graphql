@@ -32,6 +32,10 @@ const Food = new Schema({
   tags: {
     type: [{ type: Schema.Types.String, lowercase: true }],
     default: []
+  },
+  images: {
+    type: [{ type: Schema.Types.String }],
+    default: []
   }
 }, {
   timestamps: true

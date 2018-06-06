@@ -12,15 +12,17 @@ const typeDefs = `
     price: Int
     rating: Float!
     tags: [String]!
+    images: [String]!
   }
 
   input FoodRequest {
     name: String!
     address: String!
-    description: String
-    price: Int
+    description: String!
+    price: Int!
     rating: Float
-    tags: [String]
+    tags: [String]!
+    images: [String]
   }
 
   type Query {
