@@ -16,6 +16,10 @@ const User = new Schema({
     unique: true,
     validate: [isEmail, `Invalid email.`]
   },
+  fullname: {
+    type: Schema.Types.String,
+    required: true
+  },
   password: {
     type: Schema.Types.String,
     required: true

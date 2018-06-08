@@ -6,20 +6,27 @@ const typeDefs = `
   type User {
     _id: String
     email: String!
+    fullname: String
   }
 
   type Token {
     token: String
   }
 
-  input UserRequest {
+  input UserRegisterRequest {
+    email: String!
+    password: String!
+    fullname: String!
+  }
+
+  input UserLoginRequest {
     email: String!
     password: String!
   }
 
   type Query {
     # This function requires email & password.
-    login(request: UserRequest): Token
+    login(request: UserLoginRequest): Token
 
     # Get info of user.
     me: User
@@ -27,7 +34,7 @@ const typeDefs = `
 
   type Mutation {
     # This function requires email & password.
-    registerUser(request: UserRequest): User
+    registerUser(request: UserRegisterRequest): User
   }
 `
 
