@@ -40,7 +40,7 @@ app.use('/graphql', graphqlExpress((req, res) => {
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 app.get('/', (req, res) => {
-   return res.status(200).send(`Food server.`)
+  return res.status(200).send(`Food server.`)
 })
 
 if (cluster.isMaster) {
