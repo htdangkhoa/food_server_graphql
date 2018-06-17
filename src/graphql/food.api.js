@@ -28,8 +28,11 @@ const typeDefs = `
   type Query {
     getAllFoods(skip: Int): [Food]
 
-    # q requires a array os String.
-    searchFood(q: [String]!): [Food]
+    # q is a array of string.
+    searchFoodByTags(q: [String]!): [Food]
+
+    # q is a string.
+    searchFoodByName(q: String!): [Food]
   }
 
   type Mutation {
@@ -73,10 +76,23 @@ const addFood = async (_, args, context) => {
   }
 }
 
-const searchFood = async (_, args) => {
+const searchFoodByTags = async (_, args) => {
   let { q } = args
 
   let foods = await Food.find({ tags: { '$in': q } })
+
+  return foods
+}
+
+const searchFoodByName = async (_, args) => {
+  let { q } = args
+
+  let foods = await Food.find({
+    name: {
+      $regex: q,
+      $options: 'i'
+    }
+  })
 
   return foods
 }
@@ -116,7 +132,8 @@ const rateFood = async (_, args, context) => {
 const resolvers = {
   Query: {
     getAllFoods,
-    searchFood
+    searchFoodByTags,
+    searchFoodByName
   },
   Mutation: {
     addFood,

@@ -39,8 +39,6 @@ const Food = new Schema({
   }
 }, {
   timestamps: true
-}).index({
-  tags: 'text'
 })
 
 export default mongoose.model('food', Food)
