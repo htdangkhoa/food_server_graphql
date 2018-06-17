@@ -10,7 +10,8 @@ const typeDefs = `
   }
 
   type Token {
-    token: String
+    accessToken: String
+    refreshToken: String!
   }
 
   input UserRegisterRequest {
@@ -25,8 +26,11 @@ const typeDefs = `
   }
 
   type Query {
-    # This function requires email & password.
+    # The accessToken is only valid for 1 hour,
+    # please using refreshToken to get new accessToken.
     login(request: UserLoginRequest): Token
+
+    renewToken(refreshToken: String!): Token
 
     # Get info of user.
     me: User
@@ -51,11 +55,44 @@ const login = async (_, args) => {
   
       if (!isMatch) return reject(`Email or password is not correct.`) 
   
-      let token = sign(user)
+      let accessToken = sign(user, { expiresIn: '1h' })
+
+      let refreshToken = sign(user, { expiresIn: '6h' })
   
-      return resolve({ token })
+      return resolve({ accessToken, refreshToken })
     })
   })
+}
+
+const renewToken = async (_, args) => {
+  let { refreshToken } = args
+
+  let realToken = refreshToken
+    .replace(/Bearer /g, '')
+    .replace(/bearer /g, '')
+
+  let payload = await verify(`Bearer ${ realToken }`)
+
+  if (!payload) throw 'invalid token.'
+  
+  let _accessToken = sign(payload, { expiresIn: '1h' })
+
+  let _refreshToken = sign(payload, { expiresIn: '6h' })
+  
+  return {
+    accessToken: _accessToken,
+    refreshToken: _refreshToken
+  }
+}
+
+const me = async (_, args, context) => {
+  let { token } = context
+
+  let payload = await verify(token)
+  
+  if (!payload) throw 'invalid token.'
+
+  return payload
 }
 
 const registerUser = async (_, args) => {
@@ -72,19 +109,10 @@ const registerUser = async (_, args) => {
   }
 }
 
-const me = async (_, args, context) => {
-  let { token } = context
-
-  let payload = await verify(token)
-  
-  if (!payload) throw 'invalid token.'
-
-  return payload
-}
-
 const resolvers = {
   Query: {
     login,
+    renewToken,
     me
   },
   Mutation: {
