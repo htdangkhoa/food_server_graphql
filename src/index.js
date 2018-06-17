@@ -3,6 +3,7 @@ import path from 'path'
 import dotenv from 'dotenv'
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import cluster from 'cluster'
 import os from 'os'
 import mongoose from 'mongoose'
@@ -21,6 +22,7 @@ mongoose.connect(process.env.DB, (error, db) => {
 })
 
 app.use([
+  cors(),
   bodyParser.json(), 
   bodyParser.urlencoded({ extended: false })
 ])
