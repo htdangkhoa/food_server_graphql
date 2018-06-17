@@ -1,17 +1,16 @@
 import './utils/logger'
+import path from 'path'
 import dotenv from 'dotenv'
 import express from 'express'
 import bodyParser from 'body-parser'
-
-// For balancing.
 import cluster from 'cluster'
 import os from 'os'
-const cpus = os.cpus().length
-
 import mongoose from 'mongoose'
-
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import schema from './graphql'
+
+const cpus = os.cpus().length
+const app = express()
 
 dotenv.config()
 
@@ -20,8 +19,6 @@ mongoose.connect(process.env.DB, (error, db) => {
 
   return console.info(`Connect mongoDB successful`)
 })
-
-const app = express()
 
 app.use([
   bodyParser.json(), 
@@ -37,7 +34,9 @@ app.use('/graphql', graphqlExpress((req, res) => {
   }
 }))
 
-app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
+app.use('/graphiql', (req, res) => {
+  res.sendFile(path.join(__dirname + '/public/index.html'));
+})
 
 app.get('/', (req, res) => {
   return res.status(200).send(`Food server.`)
