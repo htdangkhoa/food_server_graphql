@@ -37,7 +37,7 @@ app.use('/graphql', graphqlExpress((req, res) => {
 }))
 
 app.use('/graphiql', (req, res) => {
-  res.sendFile(path.join(__dirname + '/public/index.html'));
+  res.sendFile(path.resolve(__dirname, '../src/public/index.html'));
 })
 
 app.get('/', (req, res) => {
