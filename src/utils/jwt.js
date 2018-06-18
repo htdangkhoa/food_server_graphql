@@ -11,13 +11,7 @@ const sign = async (payload, options) => {
 }
 
 const verify = async (token, cb) => {
-  if (!token) throw `You are missing token.`
-
-  let _tk = token.split('Bearer ')[1]
-
-  if (!_tk) throw `invalid token.`
-
-  let payload = await jwt.verify(_tk, secret, cb)
+  let payload = await jwt.verify(token, secret, cb)
 
   let raw = decrypt(payload.data)
 

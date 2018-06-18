@@ -8,7 +8,9 @@ import cluster from 'cluster'
 import os from 'os'
 import mongoose from 'mongoose'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
-import schema from './graphql'
+import authSchema from './graphql/authorized'
+import unAuthSchema from './graphql/unauthorized'
+import { verify } from './utils/jwt'
 
 const cpus = os.cpus().length
 const app = express()
@@ -27,12 +29,24 @@ app.use([
   bodyParser.urlencoded({ extended: false })
 ])
 
-app.use('/graphql', graphqlExpress((req, res) => {
+app.use('/graphql', graphqlExpress(async (req, res) => {
   let token = req.headers.authorization
-  return {
-    schema,
-    context: { token },
-    rootValue: { req, res }
+
+  try {
+    let _tk = token.split('Bearer ')[1]
+
+    let payload = await verify(_tk)
+
+    return {
+      schema: (!payload) ? unAuthSchema : authSchema,
+      context: { user: payload },
+      rootValue: { req, res }
+    }
+  } catch (error) {
+    return {
+      schema: unAuthSchema,
+      rootValue: { req, res }
+    }
   }
 }))
 

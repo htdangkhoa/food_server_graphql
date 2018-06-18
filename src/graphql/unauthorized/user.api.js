@@ -1,6 +1,6 @@
 import { makeExecutableSchema } from 'graphql-tools'
-import { sign, verify } from '../utils/jwt'
-import User from '../models/user.model'
+import { sign, verify } from '../../utils/jwt'
+import User from '../../models/user.model'
 
 const typeDefs = `
   type User {
@@ -12,6 +12,13 @@ const typeDefs = `
   type Token {
     accessToken: String
     refreshToken: String!
+  }
+
+  type Author {
+    name: String
+    phone: String
+    email: String
+    github: String!
   }
 
   input UserRegisterRequest {
@@ -32,8 +39,7 @@ const typeDefs = `
 
     renewToken(refreshToken: String!): Token
 
-    # Get info of user.
-    me: User
+    about: Author
   }
 
   type Mutation {
@@ -85,14 +91,13 @@ const renewToken = async (_, args) => {
   }
 }
 
-const me = async (_, args, context) => {
-  let { token } = context
-
-  let payload = await verify(token)
-  
-  if (!payload) throw 'invalid token.'
-
-  return payload
+const about = () => {
+  return {
+    name: `Huynh Tran Dang Khoa`,
+    phone: `01229088405`,
+    email: `huynhtran.dangkhoa@gmail.com`,
+    github: `https://github.com/htdangkhoa`
+  }
 }
 
 const registerUser = async (_, args) => {
@@ -113,7 +118,7 @@ const resolvers = {
   Query: {
     login,
     renewToken,
-    me
+    about
   },
   Mutation: {
     registerUser

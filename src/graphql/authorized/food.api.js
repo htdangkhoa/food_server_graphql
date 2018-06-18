@@ -1,7 +1,6 @@
 import { makeExecutableSchema } from 'graphql-tools'
-import { verify } from '../utils/jwt'
 import lodash from 'lodash'
-import Food from '../models/food.model'
+import Food from '../../models/food.model'
 
 const typeDefs = `
   type Food {
@@ -54,28 +53,6 @@ const getAllFoods = async (_, args) => {
   return foods
 }
 
-const addFood = async (_, args, context) => {
-  let { token } = context
-
-  let payload = await verify(token)
-  
-  if (!payload) throw 'invalid token.'
-
-  let { request } = args
-  if (request.rating)
-    request.rating = parseFloat((request.rating).toFixed(1))
-
-  let food = new Food(request)
-
-  try {
-    let result = await food.save()
-
-    return result
-  } catch (error) {
-    throw error
-  }
-}
-
 const searchFoodByTags = async (_, args) => {
   let { q } = args
 
@@ -97,13 +74,23 @@ const searchFoodByName = async (_, args) => {
   return foods
 }
 
-const rateFood = async (_, args, context) => {
-  let { token } = context
+const addFood = async (_, args) => {
+  let { request } = args
+  if (request.rating)
+    request.rating = parseFloat((request.rating).toFixed(1))
 
-  let payload = await verify(token)
-  
-  if (!payload) throw 'invalid token.'
+  let food = new Food(request)
 
+  try {
+    let result = await food.save()
+
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
+const rateFood = async (_, args) => {
   let { foodId, score } = args
 
   if (score > 5) throw `Sorry, your vote is not valid.`
