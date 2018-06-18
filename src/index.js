@@ -22,7 +22,7 @@ mongoose.connect(process.env.DB, (error, db) => {
 })
 
 app.use([
-  cors(),
+  cors({credentials: true, origin: true}),
   bodyParser.json(), 
   bodyParser.urlencoded({ extended: false })
 ])
