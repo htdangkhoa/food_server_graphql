@@ -73,11 +73,13 @@ const login = async (_, args) => {
 const renewToken = async (_, args) => {
   let { refreshToken } = args
 
+  console.debug(refreshToken)
+
   let realToken = refreshToken
     .replace(/Bearer /g, '')
     .replace(/bearer /g, '')
 
-  let payload = await verify(`Bearer ${ realToken }`)
+  let payload = await verify(realToken)
 
   if (!payload) throw 'invalid token.'
   
