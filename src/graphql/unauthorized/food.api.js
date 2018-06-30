@@ -2,6 +2,11 @@ import { makeExecutableSchema } from 'graphql-tools'
 import Food from '../../models/food.model'
 
 const typeDefs = `
+  enum SearchTypes {
+    BY_TAGS,
+    BY_NAME
+  }
+
   type Food {
     _id: String
     name: String
@@ -23,14 +28,16 @@ const typeDefs = `
     images: [String]
   }
 
+  input SearchFoodRequest {
+    type: SearchTypes!,
+    tags: [String],
+    name: String
+  }
+
   type Query {
     getAllFoods(skip: Int): [Food]
-
-    # q is a array of string.
-    searchFoodByTags(q: [String]!): [Food]
-
-    # q is a string.
-    searchFoodByName(q: String!): [Food]
+    
+    search(request: SearchFoodRequest!): [Food]
   }
 `
 
@@ -44,23 +51,27 @@ const getAllFoods = async (_, args) => {
   return foods
 }
 
-const searchFoodByTags = async (_, args) => {
-  let { q } = args
+const search = async (_, args) => {
+  let { request } = args
+  let { type, tags, name } = request
 
-  let foods = await Food.find({ tags: { '$in': q } })
+  var foods
 
-  return foods
-}
-
-const searchFoodByName = async (_, args) => {
-  let { q } = args
-
-  let foods = await Food.find({
-    name: {
-      $regex: q,
-      $options: 'i'
+  switch (type) {
+    case "BY_NAME": {
+      foods = await Food.find({
+        name: {
+          $regex: name,
+          $options: 'i'
+        }
+      })
+      break
     }
-  })
+    case "BY_TAGS": {
+      foods = await Food.find({ tags: { '$in': tags } })
+      break
+    }
+  }
 
   return foods
 }
@@ -68,8 +79,7 @@ const searchFoodByName = async (_, args) => {
 const resolvers = {
   Query: {
     getAllFoods,
-    searchFoodByTags,
-    searchFoodByName
+    search
   }
 }
 

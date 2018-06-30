@@ -13,11 +13,20 @@ const typeDefs = `
     refreshToken: String!
   }
 
+  type Author {
+    name: String
+    phone: String
+    email: String
+    github: String!
+  }
+
   type Query {
     renewToken(refreshToken: String!): Token
 
     # Get info of user.
     me: User
+
+    about: Author
   }
 `
 
@@ -50,10 +59,20 @@ const me = async (_, args, context) => {
   return user
 }
 
+const about = () => {
+  return {
+    name: `Huynh Tran Dang Khoa`,
+    phone: `01229088405`,
+    email: `huynhtran.dangkhoa@gmail.com`,
+    github: `https://github.com/htdangkhoa`
+  }
+}
+
 const resolvers = {
   Query: {
     renewToken,
-    me
+    me,
+    about
   }
 }
 
