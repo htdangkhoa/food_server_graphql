@@ -1,5 +1,5 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import Food from '../../models/food.model'
+import { makeExecutableSchema } from 'graphql-tools';
+import Food from '../../models/food.model';
 
 const typeDefs = `
   enum SearchTypes {
@@ -39,50 +39,50 @@ const typeDefs = `
     
     search(request: SearchFoodRequest!): [Food]
   }
-`
+`;
 
 const getAllFoods = async (_, args) => {
-  let { skip } = args
+  const { skip } = args;
 
-  let foods = await Food.find()
+  const foods = await Food.find()
     .skip((skip || 0) * 10)
-    .limit(10)
+    .limit(10);
 
-  return foods
-}
+  return foods;
+};
 
 const search = async (_, args) => {
-  let { request } = args
-  let { type, tags, name } = request
+  const { request } = args;
+  const { type, tags, name } = request;
 
-  var foods
+  let foods;
 
   switch (type) {
-    case "BY_NAME": {
+    case 'BY_NAME': {
       foods = await Food.find({
         name: {
           $regex: name,
-          $options: 'i'
-        }
-      })
-      break
+          $options: 'i',
+        },
+      });
+      break;
     }
-    case "BY_TAGS": {
-      foods = await Food.find({ tags: { '$in': tags } })
-      break
+    default: {
+      foods = await Food.find({ tags: { $in: tags } });
+      break;
     }
   }
 
-  return foods
-}
+  return foods;
+};
 
 const resolvers = {
   Query: {
     getAllFoods,
-    search
-  }
-}
+    search,
+  },
+};
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-export default schema
+export default schema;

@@ -1,5 +1,5 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import { sign, verify } from '../../utils/jwt'
+import { makeExecutableSchema } from 'graphql-tools';
+import { sign, verify } from '../../utils/jwt';
 
 const typeDefs = `
   type User {
@@ -28,54 +28,50 @@ const typeDefs = `
 
     about: Author
   }
-`
+`;
 
 const renewToken = async (_, args) => {
-  let { refreshToken } = args
+  const { refreshToken } = args;
 
-  console.debug(refreshToken)
+  console.debug(refreshToken);
 
-  let realToken = refreshToken
-    .replace(/Bearer /g, '')
-    .replace(/bearer /g, '')
+  const realToken = refreshToken.replace(/Bearer /g, '').replace(/bearer /g, '');
 
-  let payload = await verify(realToken)
+  const payload = await verify(realToken);
 
-  if (!payload) throw 'invalid token.'
-  
-  let _accessToken = sign(payload, { expiresIn: '1h' })
+  if (!payload) throw new Error('invalid token.');
 
-  let _refreshToken = sign(payload, { expiresIn: '6h' })
-  
+  const accessToken = sign(payload, { expiresIn: '1h' });
+
+  const newRefreshToken = sign(payload, { expiresIn: '6h' });
+
   return {
-    accessToken: _accessToken,
-    refreshToken: _refreshToken
-  }
-}
+    accessToken,
+    refreshToken: newRefreshToken,
+  };
+};
 
 const me = async (_, args, context) => {
-  let { user } = context
+  const { user } = context;
 
-  return user
-}
+  return user;
+};
 
-const about = () => {
-  return {
-    name: `Huynh Tran Dang Khoa`,
-    phone: `01229088405`,
-    email: `huynhtran.dangkhoa@gmail.com`,
-    github: `https://github.com/htdangkhoa`
-  }
-}
+const about = () => ({
+  name: 'Huynh Tran Dang Khoa',
+  phone: '01229088405',
+  email: 'huynhtran.dangkhoa@gmail.com',
+  github: 'https://github.com/htdangkhoa',
+});
 
 const resolvers = {
   Query: {
     renewToken,
     me,
-    about
-  }
-}
+    about,
+  },
+};
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-export default schema
+export default schema;

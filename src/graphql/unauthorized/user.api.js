@@ -1,6 +1,6 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import { sign, verify } from '../../utils/jwt'
-import User from '../../models/user.model'
+import { makeExecutableSchema } from 'graphql-tools';
+import { sign, verify } from '../../utils/jwt';
+import User from '../../models/user.model';
 
 const typeDefs = `
   type User {
@@ -46,87 +46,83 @@ const typeDefs = `
     # This function requires email & password.
     registerUser(request: UserRegisterRequest): User
   }
-`
+`;
 
 const login = async (_, args) => {
-  let { email, password } = args.request
+  const { email, password } = args.request;
 
-  let user = await User.findOne({ email })
+  const user = await User.findOne({ email });
 
-  if (!user) throw `Email or password is not correct.`
-  
+  if (!user) throw new Error('Email or password is not correct.');
+
   return new Promise((resolve, reject) => {
-    user.comparePassword(password, function (error, isMatch) {
-      if (error) throw error
-  
-      if (!isMatch) return reject(`Email or password is not correct.`) 
-  
-      let accessToken = sign(user, { expiresIn: '1h' })
+    user.comparePassword(password, (error, isMatch) => {
+      if (error) throw error;
 
-      let refreshToken = sign(user, { expiresIn: '6h' })
-  
-      return resolve({ accessToken, refreshToken })
-    })
-  })
-}
+      if (!isMatch) return reject(new Error('Email or password is not correct.'));
+
+      const accessToken = sign(user, { expiresIn: '1h' });
+
+      const refreshToken = sign(user, { expiresIn: '6h' });
+
+      return resolve({ accessToken, refreshToken });
+    });
+  });
+};
 
 const renewToken = async (_, args) => {
-  let { refreshToken } = args
+  const { refreshToken } = args;
 
-  console.debug(refreshToken)
+  console.debug(refreshToken);
 
-  let realToken = refreshToken
-    .replace(/Bearer /g, '')
-    .replace(/bearer /g, '')
+  const realToken = refreshToken.replace(/Bearer /g, '').replace(/bearer /g, '');
 
-  let payload = await verify(realToken)
+  const payload = await verify(realToken);
 
-  if (!payload) throw 'invalid token.'
-  
-  let _accessToken = sign(payload, { expiresIn: '1h' })
+  if (!payload) throw new Error('invalid token.');
 
-  let _refreshToken = sign(payload, { expiresIn: '6h' })
-  
+  const accessToken = sign(payload, { expiresIn: '1h' });
+
+  const newRefreshToken = sign(payload, { expiresIn: '6h' });
+
   return {
-    accessToken: _accessToken,
-    refreshToken: _refreshToken
-  }
-}
+    accessToken,
+    refreshToken: newRefreshToken,
+  };
+};
 
-const about = () => {
-  return {
-    name: `Huynh Tran Dang Khoa`,
-    phone: `01229088405`,
-    email: `huynhtran.dangkhoa@gmail.com`,
-    github: `https://github.com/htdangkhoa`
-  }
-}
+const about = () => ({
+  name: 'Huynh Tran Dang Khoa',
+  phone: '01229088405',
+  email: 'huynhtran.dangkhoa@gmail.com',
+  github: 'https://github.com/htdangkhoa',
+});
 
 const registerUser = async (_, args) => {
-  let { request } = args
+  const { request } = args;
 
-  let user = new User(request)
+  const user = new User(request);
 
   try {
-    let result = await user.save()
-    
-    return user
+    await user.save();
+
+    return user;
   } catch (error) {
-    throw error
+    throw error;
   }
-}
+};
 
 const resolvers = {
   Query: {
     login,
     renewToken,
-    about
+    about,
   },
   Mutation: {
-    registerUser
-  }
-}
+    registerUser,
+  },
+};
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-export default schema
+export default schema;

@@ -1,9 +1,9 @@
-import { mergeSchemas } from 'graphql-tools'
-import user from './user.api'
-import food from './food.api'
+import { mergeSchemas } from 'graphql-tools';
+import user from './user.api';
+import food from './food.api';
 
 const schema = mergeSchemas({
-  schemas: [user, food]
-})
+  schemas: [user, food],
+});
 
-export default schema
+export default schema;

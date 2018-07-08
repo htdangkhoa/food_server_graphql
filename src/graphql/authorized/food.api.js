@@ -1,6 +1,6 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import lodash from 'lodash'
-import Food from '../../models/food.model'
+import { makeExecutableSchema } from 'graphql-tools';
+import lodash from 'lodash';
+import Food from '../../models/food.model';
 
 const typeDefs = `
   enum SearchTypes {
@@ -48,96 +48,95 @@ const typeDefs = `
     # The score maximize is 5.
     rateFood(foodId: String!, score: Int!): Food
   }
-`
+`;
 
 const getAllFoods = async (_, args) => {
-  let { skip } = args
+  const { skip } = args;
 
-  let foods = await Food.find()
+  const foods = await Food.find()
     .skip((skip || 0) * 10)
-    .limit(10)
+    .limit(10);
 
-  return foods
-}
+  return foods;
+};
 
 const search = async (_, args) => {
-  let { request } = args
-  let { type, tags, name } = request
+  const { request } = args;
+  const { type, tags, name } = request;
 
-  var foods
+  let foods;
 
   switch (type) {
-    case "BY_NAME": {
+    case 'BY_NAME': {
       foods = await Food.find({
         name: {
           $regex: name,
-          $options: 'i'
-        }
-      })
-      break
+          $options: 'i',
+        },
+      });
+      break;
     }
-    case "BY_TAGS": {
-      foods = await Food.find({ tags: { '$in': tags } })
-      break
+    default: {
+      foods = await Food.find({ tags: { $in: tags } });
+      break;
     }
   }
 
-  return foods
-}
+  return foods;
+};
 
 const addFood = async (_, args) => {
-  let { request } = args
-  if (request.rating)
-    request.rating = parseFloat((request.rating).toFixed(1))
+  const { request } = args;
+  if (request.rating) request.rating = parseFloat(request.rating.toFixed(1));
 
-  let food = new Food(request)
+  const food = new Food(request);
 
   try {
-    let result = await food.save()
+    const result = await food.save();
 
-    return result
+    return result;
   } catch (error) {
-    throw error
+    throw error;
   }
-}
+};
 
 const rateFood = async (_, args) => {
-  let { foodId, score } = args
+  const { foodId, score } = args;
 
-  if (score > 5) throw `Sorry, your vote is not valid.`
+  if (score > 5) throw new Error('Sorry, your vote is not valid.');
 
-  let food = await Food.findOne({ _id: foodId })
+  const food = await Food.findOne({ _id: foodId });
 
-  if (!food) throw `The food does not exits.`
+  if (!food) throw new Error('The food does not exits.');
 
-  food.counting.push(score)
+  food.counting.push(score);
 
-  var arrScore = food.counting
+  const arrScore = food.counting;
 
-  let avg = arrScore.reduce((arrScore, i) => arrScore + i) / arrScore.length
+  const avg = arrScore.reduce((arr, i) => arr + i) / arrScore.length;
 
-  food.rating = lodash.round(avg, 1)
+  food.rating = lodash.round(avg, 1);
 
   try {
-    let result = await food.save()
+    await food.save();
 
-    return food
+    return food;
   } catch (error) {
-    throw error
+    throw error;
   }
-}
+};
 
 const resolvers = {
   Query: {
     getAllFoods,
-    search
+    search,
   },
   Mutation: {
     addFood,
-    rateFood
-  }
-}
+    rateFood,
+  },
+};
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-export default schema
+export default schema;
